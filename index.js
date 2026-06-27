@@ -8,6 +8,7 @@ const { calculateTrustScore } = require("./trustScore");
 
 const app = express();
 app.use(express.json());
+app.use(express.static("public"));
 
 // Health check
 app.get("/", (req, res) => {
