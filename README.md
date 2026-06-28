@@ -137,12 +137,3 @@ npx nodemon index.js
 
 Then visit `http://localhost:3000` for the dashboard.
 
----
-
-## Honest Limitations
-
-- **Risk detection** is keyword/pattern-based, not a full static-analysis security scanner. This was a deliberate choice to keep the logic transparent and easy to verify, not a claim that it's the most sophisticated possible approach.
-- **Code-origin tracking is forward-looking only** — it cannot retroactively determine whether code already sitting in an existing repository was AI-generated or human-written.
-- **Bug and revert counts are currently entered manually**, rather than pulled automatically from git history — a natural next step.
-- **PR comments currently post under the developer's own GitHub account** (since the API call authenticates with a personal token), rather than a separate bot identity. A dedicated GitHub App would be the next step toward a more polished, team-ready version.
-- A comparable commercial tool, [Git AI](https://github.com/git-ai-project), tackles an overlapping problem — line-level AI code attribution across the full development lifecycle. Tracr is intentionally narrower in scope, focused specifically on review-time risk warnings and trust scoring rather than full attribution tracking.
