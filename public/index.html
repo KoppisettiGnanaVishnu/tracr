@@ -50,6 +50,26 @@
     letter-spacing: 1.5px;
   }
 
+  .tagline button {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--muted);
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: color 0.15s, text-decoration-color 0.15s;
+  }
+  .tagline button:hover {
+    color: var(--ink);
+    text-decoration-color: var(--ink);
+  }
+  .tagline .sep { margin: 0 4px; }
+
   .controls {
     display: flex;
     gap: 10px;
@@ -167,7 +187,9 @@
 <div class="wrap">
   <header>
     <h1>Tracr</h1>
-    <div class="tagline">Tracking · Review · Code-origin · Record</div>
+    <div class="tagline">
+      <button onclick="scrollToTable()">Tracking</button><span class="sep">·</span><button onclick="openReviewPR()">Review</button><span class="sep">·</span><button onclick="explainCodeOrigin()">Code-origin</button><span class="sep">·</span><button onclick="loadRepo()">Record</button>
+    </div>
   </header>
 
   <div class="controls">
@@ -247,6 +269,25 @@ function escapeHtml(str) {
 }
 
 loadRepo();
+
+function scrollToTable() {
+  document.getElementById('tableArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openReviewPR() {
+  window.open('https://github.com/KoppisettiGnanaVishnu/tracr-demo-repo/pull/1', '_blank');
+}
+
+function explainCodeOrigin() {
+  alert(
+    "Code-origin tracking:\n\n" +
+    "Tracr tags each code block as either AI-generated or human-written.\n\n" +
+    "Right now this tagging happens via direct API input (see the README's " +
+    "\"Try it yourself\" section). A VS Code extension for automatic detection " +
+    "is planned as the next step \u2014 see pocDetector.js in the repo for an " +
+    "early proof-of-concept."
+  );
+}
 </script>
 </body>
 </html>
