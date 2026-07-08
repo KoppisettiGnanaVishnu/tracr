@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@octokit/app": "^16.1.2",
     "better-sqlite3": "^12.11.1",
