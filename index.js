@@ -104,34 +104,32 @@ app.get("/api/trust-score/:repo_name", (req, res) => {
 /* =========================================================
    GitHub Webhook
 ========================================================= */
+app.post("/webhook", async (req, res) => {
+  // Respond to GitHub immediately
+  res.sendStatus(200);
 
-app.post("/webhook", (req, res) => {
+  const event = req.headers["x-github-event"];
 
-  console.log("\n======================================");
-  console.log("📩 GitHub Webhook Received");
-  console.log("======================================");
+  if (event !== "pull_request") return;
+  if (req.body.action !== "opened") return;
 
-  console.log("Event:", req.headers["x-github-event"]);
+  try {
+    const owner = req.body.repository.owner.login;
+    const repo = req.body.repository.name;
+    const pullNumber = req.body.pull_request.number;
 
-  if (req.body.action) {
-    console.log("Action:", req.body.action);
+    console.log("🚀 New Pull Request");
+    console.log(`${owner}/${repo}`);
+    console.log("PR #" + pullNumber);
+
+    const findings = await scanPullRequest(owner, repo, pullNumber);
+
+    console.log("Scan complete:", findings);
+
+  } catch (err) {
+    console.error("Webhook Error:");
+    console.error(err);
   }
-
-  if (req.body.repository) {
-    console.log("Repository:", req.body.repository.full_name);
-  }
-
-  if (req.body.sender) {
-    console.log("Sender:", req.body.sender.login);
-  }
-
-  if (req.body.pull_request) {
-    console.log("PR:", req.body.pull_request.html_url);
-  }
-
-  console.log("======================================\n");
-
-  res.status(200).send("Webhook received");
 });
 
 /* =========================================================
