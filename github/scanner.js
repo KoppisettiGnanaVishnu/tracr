@@ -4,8 +4,7 @@
 
 require("dotenv").config();
 const { Octokit } = require("octokit");
-const { scanForRisk } = require("./riskScanner");
-
+const { scanForRisk } = require("../services/riskScanner");
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 async function scanPullRequest(owner, repo, pullNumber) {
