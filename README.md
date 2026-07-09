@@ -1,16 +1,10 @@
 # Tracr
 
-> **A GitHub App that helps engineering teams safely review AI-assisted code before it reaches production.**
+> **A GitHub App that helps engineering teams review AI-assisted code more safely.**
 
-<p align="center">
+Tracr (Tracking Review And Code-origin Record) adds an accountability layer to AI-assisted software development. Whenever a Pull Request is opened, Tracr automatically scans newly added code for risky patterns and posts review comments directly on GitHub.
 
-![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-Backend-black?logo=express)
-![GitHub App](https://img.shields.io/badge/GitHub-App-181717?logo=github)
-![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite)
-![License](https://img.shields.io/badge/License-MIT-green)
-
-</p>
+Unlike traditional code scanners, Tracr focuses on **review awareness**—helping reviewers identify AI-assisted changes in sensitive areas before they are merged.
 
 ---
 
@@ -22,245 +16,204 @@ https://tracr-6gyu.onrender.com
 
 > **Note**
 >
-> The application is hosted on Render's free tier.
-> If it has been idle, the first request may take **30–60 seconds** while the service wakes up.
+> The demo is hosted on Render's free tier. If the service has been idle, the first request may take **30–60 seconds** while it wakes up.
 
 ---
 
-# What is Tracr?
+# Why Tracr?
 
-Tracr (**Tracking Review And Code-origin Record**) is a GitHub App that provides an accountability layer for AI-assisted software development.
+AI coding assistants such as GitHub Copilot, Cursor, Claude, and ChatGPT are becoming a standard part of software development.
 
-Whenever a Pull Request is opened, Tracr automatically:
+They significantly improve productivity, but they also introduce a new challenge:
 
-- receives the GitHub webhook
-- authenticates using GitHub App Installation Authentication
-- downloads the Pull Request diff
-- scans newly added code for risky patterns
-- posts a review comment directly on the Pull Request
-- maintains a repository trust score over time
+> AI-generated code often looks polished enough that reviewers may spend less time examining it—especially in sensitive areas like authentication, payments, or secret management.
 
-Unlike traditional static analysis tools, Tracr focuses on **review awareness** rather than trying to prove whether code is correct.
-
-Its goal is simple:
-
-> **Help reviewers spend more attention on AI-generated changes that affect sensitive parts of an application.**
+Tracr helps engineering teams identify these higher-risk changes and encourages additional human review before they reach production.
 
 ---
 
-# The Problem
+# Features
 
-AI coding assistants such as
-
-- GitHub Copilot
-- Cursor
-- Claude Code
-- ChatGPT
-
-have fundamentally changed how software is written.
-
-Developers now generate large amounts of code in seconds.
-
-The problem isn't that AI always writes bad code.
-
-The real problem is that **AI-generated code often receives less critical review because it appears polished and confident.**
-
-Reviewers naturally trust clean-looking code.
-
-That creates a dangerous situation where authentication logic, payment handling, database operations, or secret management can be merged without receiving the level of scrutiny they deserve.
-
-Research consistently shows that AI-generated code can introduce security issues and logical mistakes while simultaneously increasing developer confidence.
-
-Today's review tools focus on:
-
-- formatting
-- linting
-- testing
-- security scanning
-
-Very few tools ask:
-
-> **Should this specific AI-generated change receive extra human attention before merging?**
-
-That's the gap Tracr is designed to fill.
+- GitHub App integration
+- GitHub Webhooks
+- GitHub App Installation Authentication
+- Automatic Pull Request scanning
+- Rule-based risk detection
+- Repository Trust Score
+- AI vs Human code tracking
+- SQLite-backed scan history
+- Lightweight dashboard
 
 ---
 
-# The Solution
+# Multi-Repository Support
 
-Tracr acts as a GitHub App sitting inside the Pull Request workflow.
+Tracr is built as a **GitHub App**, not a Personal Access Token tool.
 
-Instead of replacing code review, it enhances it.
+Once the GitHub App is installed on a repository:
 
-Whenever a Pull Request is opened:
+- GitHub automatically sends Pull Request webhooks to Tracr.
+- Tracr authenticates using the repository's **Installation ID**.
+- A temporary Installation Access Token is generated.
+- The Pull Request is scanned automatically.
+- Review comments are posted directly on GitHub.
 
-1. GitHub sends a webhook to Tracr.
-2. Tracr authenticates using GitHub App Installation Tokens.
-3. It downloads the changed files.
-4. Only the newly added lines are analyzed.
-5. Sensitive patterns are identified.
-6. If risky changes are detected, Tracr automatically comments on the Pull Request.
-
-Example:
-
-```text
-⚠️ Tracr Risk Warning
-
-This Pull Request contains changes touching sensitive areas.
-
-• auth.js — authentication logic
-• payment.js — payment handling
-
-Please ensure these changes receive human review before merging.
-```
-
-Tracr does **not** block merges.
-
-It does **not** replace developers.
-
-It simply ensures reviewers pay closer attention where the risk is highest.
+This architecture allows a single Tracr deployment to securely support multiple repositories without requiring users to share personal GitHub credentials.
 
 ---
 
-# Key Features
-
-## GitHub App
-
-Built as a real GitHub App instead of relying on Personal Access Tokens.
-
-Any repository that installs the app can immediately use Tracr.
-
----
-
-## GitHub Webhooks
-
-Automatically responds whenever a Pull Request is opened.
-
-No manual scanning required.
-
----
-
-## Installation Authentication
-
-Uses GitHub App Installation Tokens instead of Personal Access Tokens.
-
-Benefits:
-
-- repository-specific permissions
-- short-lived tokens
-- secure authentication
-- supports multiple organizations
-
----
-
-## Risk Scanner
-
-Scans newly added code for sensitive patterns including:
-
-- authentication
-- passwords
-- API keys
-- tokens
-- payment logic
-- SQL deletion
-- environment variables
-- secrets
-
----
-
-## Pull Request Review
-
-Automatically posts review comments directly inside GitHub Pull Requests.
-
-Reviewers receive warnings exactly where they already work.
-
----
-
-## Repository Trust Score
-
-Each repository receives a Trust Score (0–100) based on:
-
-- AI-generated code percentage
-- risky AI changes
-- bugs found
-- reverted code
-
-This provides long-term visibility into AI-assisted development quality.
-
----
-
-## Lightweight Dashboard
-
-A simple dashboard displays:
-
-- tracked code blocks
-- AI vs Human contributions
-- repository trust score
-- scan history
-
----
-
-## Modular Architecture
-
-The project is organized into separate modules:
-
-- GitHub Integration
-- API Routes
-- Risk Analysis
-- Database
-- Trust Score
-
-making it easy to extend and maintain.
-
----
-
-# Why GitHub App Authentication?
-
-Early versions of Tracr used a GitHub Personal Access Token.
-
-That approach had major limitations:
-
-- tied to one developer
-- difficult to share
-- excessive permissions
-- poor scalability
-
-Tracr now uses **GitHub App Installation Authentication**.
-
-When someone installs Tracr on a repository:
-
-- GitHub creates an Installation ID.
-- Every webhook contains that Installation ID.
-- Tracr generates a temporary Installation Access Token.
-- The repository is scanned securely without storing personal credentials.
-
-This allows Tracr to work for **any repository where the GitHub App is installed**.
-
----
-
-# High-Level Workflow
+# Architecture
 
 ```text
 Developer opens Pull Request
             │
             ▼
-GitHub Webhook
+      GitHub Webhook
             │
             ▼
-Tracr Backend
+      Tracr Backend
+            │
+     ┌──────┴────────┐
+     ▼               ▼
+Risk Scanner   GitHub App Auth
+     │               │
+     └──────┬────────┘
+            ▼
+      GitHub REST API
             │
             ▼
-GitHub App Installation Authentication
-            │
-            ▼
-Download Pull Request Diff
-            │
-            ▼
-Risk Scanner
-            │
-            ▼
-Review Comment
-            │
-            ▼
-Repository Trust Score
+ Comment on Pull Request
 ```
+
+---
+
+# How It Works
+
+1. A developer opens a Pull Request.
+2. GitHub sends a webhook to Tracr.
+3. Tracr authenticates using GitHub App Installation Authentication.
+4. The Pull Request diff is downloaded using Octokit.
+5. Newly added lines are scanned for risky patterns including:
+   - Authentication
+   - Passwords
+   - API Keys
+   - Tokens
+   - Payment Logic
+   - SQL Deletion
+   - Environment Variables
+6. If risky changes are found, Tracr automatically comments on the Pull Request.
+7. Scan history contributes to the repository's Trust Score.
+
+---
+
+# Repository Trust Score
+
+Every repository receives a Trust Score (0–100) calculated using tracked project data, including:
+
+- Percentage of AI-generated code
+- Risky AI-generated changes
+- Bug history
+- Reverted changes
+
+The score helps teams understand how AI-assisted development is affecting repository health over time.
+
+---
+
+# Project Structure
+
+```text
+tracr/
+
+├── database/
+│   └── db.js
+│
+├── github/
+│   ├── auth.js
+│   └── scanner.js
+│
+├── routes/
+│   ├── api.js
+│   └── webhook.js
+│
+├── services/
+│   ├── riskScanner.js
+│   └── trustScore.js
+│
+├── public/
+├── private/
+└── index.js
+```
+
+---
+
+# Tech Stack
+
+| Layer | Technology |
+|--------|------------|
+| Backend | Node.js, Express |
+| Database | SQLite (`better-sqlite3`) |
+| GitHub Integration | GitHub App + Octokit |
+| Authentication | GitHub App Installation Authentication |
+| Event System | GitHub Webhooks |
+| Frontend | HTML, CSS, JavaScript |
+| Deployment | Render |
+
+---
+
+# Run Locally
+
+Clone the repository:
+
+```bash
+git clone https://github.com/KoppisettiGnanaVishnu/tracr.git
+cd tracr
+npm install
+```
+
+Create a `.env` file:
+
+```env
+GITHUB_APP_ID=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+```
+
+Place your GitHub App private key inside the `private/` directory.
+
+Start the server:
+
+```bash
+npm start
+```
+
+---
+
+# Engineering Highlights
+
+During development, Tracr evolved from a simple GitHub API integration into a production-style GitHub App.
+
+Major engineering improvements include:
+
+- Migrated from Personal Access Tokens to GitHub App Installation Authentication
+- Implemented GitHub Webhooks for automatic Pull Request scanning
+- Migrated the backend from CommonJS to ES Modules
+- Refactored the backend into a modular architecture
+- Built a lightweight rule-based risk scanner
+- Designed a Repository Trust Score system backed by SQLite
+
+---
+
+# Roadmap
+
+- GitHub Check Runs
+- Automatic reviewer assignment
+- Organization-wide analytics
+- VS Code extension
+- Machine learning-based risk prediction
+- Team dashboard
+
+---
+
+# License
+
+MIT License
