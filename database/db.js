@@ -2,7 +2,8 @@
 // This creates a local SQLite database file and the tables
 // we need to track code blocks and their AI/human origin.
 
-const Database = require("better-sqlite3");
+import Database from "better-sqlite3";
+
 const db = new Database("tracr.db");
 
 // Table: one row per code block we've seen
@@ -21,4 +22,4 @@ db.exec(`
   )
 `);
 
-module.exports = db;
+export default db;
