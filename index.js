@@ -1,9 +1,9 @@
-require("dotenv").config();
+import "dotenv/config";
 
-const express = require("express");
+import express from "express";
 
-const apiRoutes = require("./routes/api");
-const webhookRoutes = require("./routes/webhook");
+import apiRoutes from "./routes/api.js";
+import webhookRoutes from "./routes/webhook.js";
 
 const app = express();
 

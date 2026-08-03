@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
+
+import db from "../database/db.js";
+import { scanForRisk } from "../services/riskScanner.js";
+import { calculateTrustScore } from "../services/trustScore.js";
+import { scanPullRequest } from "../github/scanner.js";
 
 const router = express.Router();
-
-const db = require("../database/db");
-const { scanForRisk } = require("../services/riskScanner");
-const { calculateTrustScore } = require("../services/trustScore");
-const { scanPullRequest } = require("../github/scanner");
 
 /* =========================================================
    Health Check
@@ -97,4 +97,4 @@ router.get("/api/trust-score/:repo_name", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,52 +1,70 @@
-// Tracr — GitHub integration
-// Reads a Pull Request's changed files, runs them through our
-// risk scanner, and posts a warning comment back on the PR.
+import "dotenv/config";
 
-require("dotenv").config();
-const { Octokit } = require("octokit");
-const { scanForRisk } = require("../services/riskScanner");
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+import { getInstallationOctokit } from "./auth.js";
+import { scanForRisk } from "../services/riskScanner.js";
+import { formatReviewComment } from "../services/commentFormatter.js";
 
-async function scanPullRequest(owner, repo, pullNumber) {
-  // 1. Get the list of files changed in this PR
+export async function scanPullRequest(
+  owner,
+  repo,
+  pullNumber,
+  installationId
+) {
+  const octokit = await getInstallationOctokit(installationId);
+
   const { data: files } = await octokit.rest.pulls.listFiles({
     owner,
     repo,
     pull_number: pullNumber,
   });
 
-  let findings = [];
+  let issues = [];
 
-  // 2. Run each changed file's added code through the risk scanner
   for (const file of files) {
-    if (!file.patch) continue; // some files (binary, etc.) have no text patch
+    if (!file.patch) continue;
 
-    // file.patch contains diff lines; we only care about ADDED lines (start with "+")
     const addedLines = file.patch
       .split("\n")
       .filter((line) => line.startsWith("+") && !line.startsWith("+++"))
       .join("\n");
 
-    const { isRisky, reasons } = scanForRisk(addedLines);
+    const result = scanForRisk(addedLines);
 
-    if (isRisky) {
-      findings.push({ file: file.filename, reasons });
+    if (result.isRisky) {
+      result.issues.forEach((issue) => {
+        issues.push({
+          ...issue,
+          file: file.filename,
+        });
+      });
     }
   }
 
-  // 3. Build a comment summarizing what we found
-  let commentBody;
-  if (findings.length === 0) {
-    commentBody = "✅ **Tracr scan:** No high-risk patterns detected in this PR's changes.";
-  } else {
-    commentBody = "⚠️ **Tracr risk warning**\n\nThis PR contains changes that touch sensitive areas:\n\n";
-    findings.forEach((f) => {
-      commentBody += `- **${f.file}** — ${f.reasons.join(", ")}\n`;
-    });
-    commentBody += "\nPlease ensure these changes have been reviewed by a human before merging.";
+  // ---------- Summary ----------
+  const filesScanned = files.length;
+
+  let riskLevel = "LOW";
+
+  if (issues.some((i) => i.severity === "HIGH")) {
+    riskLevel = "HIGH";
+  } else if (issues.some((i) => i.severity === "MEDIUM")) {
+    riskLevel = "MEDIUM";
   }
 
-  // 4. Post the comment on the actual PR
+  // Temporary trust score (Phase 2 will calculate this properly)
+  const trustScore = Math.max(100 - issues.length * 5, 0);
+
+  const report = {
+    repository: repo,
+    pullRequest: pullNumber,
+    filesScanned,
+    issues,
+    riskLevel,
+    trustScore,
+  };
+
+  const commentBody = formatReviewComment(report);
+
   await octokit.rest.issues.createComment({
     owner,
     repo,
@@ -54,8 +72,9 @@ async function scanPullRequest(owner, repo, pullNumber) {
     body: commentBody,
   });
 
-  console.log("Posted comment on PR:", commentBody);
-  return findings;
-}
+  console.log("\n===== REVIEW REPORT =====");
+  console.log(report);
+  console.log("=========================\n");
 
-module.exports = { scanPullRequest };
+  return report;
+}

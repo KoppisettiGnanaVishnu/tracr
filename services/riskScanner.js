@@ -14,13 +14,19 @@ const RISKY_PATTERNS = [
   { pattern: /api[_-]?key/i, label: "API key handling" },
 ];
 
-function scanForRisk(codeSnippet) {
-  const matches = RISKY_PATTERNS.filter(({ pattern }) => pattern.test(codeSnippet));
+export function scanForRisk(codeSnippet) {
+  const matches = RISKY_PATTERNS.filter(({ pattern }) =>
+    pattern.test(codeSnippet)
+  );
 
   return {
     isRisky: matches.length > 0,
-    reasons: matches.map((m) => m.label),
-  };
-}
 
-module.exports = { scanForRisk };
+    issues: matches.map(match => ({
+        severity: "MEDIUM",
+        icon: "⚠️",
+        title: match.label,
+        message: `Detected ${match.label}`,
+    }))
+};
+}

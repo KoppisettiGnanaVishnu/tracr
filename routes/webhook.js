@@ -1,38 +1,61 @@
-const express = require("express");
+import express from "express";
+
+import { scanPullRequest } from "../github/scanner.js";
 
 const router = express.Router();
-
-const { scanPullRequest } = require("../github/scanner");
 
 /* =========================================================
    GitHub Webhook
 ========================================================= */
 
 router.post("/webhook", async (req, res) => {
-  // Respond to GitHub immediately
+  // Respond immediately so GitHub knows we received the event
   res.sendStatus(200);
 
   const event = req.headers["x-github-event"];
 
-  if (event !== "pull_request") return;
-  if (req.body.action !== "opened") return;
+// Only process Pull Request events
+if (event !== "pull_request") return;
+
+// Process only these PR actions
+const allowedActions = [
+  "opened",
+  "synchronize",
+  "reopened",
+];
+
+if (!allowedActions.includes(req.body.action)) {
+  return;
+}
 
   try {
     const owner = req.body.repository.owner.login;
     const repo = req.body.repository.name;
     const pullNumber = req.body.pull_request.number;
+    const installationId = req.body.installation?.id;
 
-    console.log("🚀 New Pull Request");
-    console.log(`${owner}/${repo}`);
-    console.log("PR #" + pullNumber);
+    console.log("\n======================================");
+    console.log("🚀 New Pull Request Detected");
+    console.log("Repository      :", `${owner}/${repo}`);
+    console.log("PR Number       :", pullNumber);
+    console.log("Installation ID :", installationId);
+    console.log("Sender          :", req.body.sender.login);
+    console.log("======================================\n");
 
-    const findings = await scanPullRequest(owner, repo, pullNumber);
+    const findings = await scanPullRequest(
+      owner,
+      repo,
+      pullNumber,
+      installationId
+    );
 
-    console.log("Scan complete:", findings);
+    console.log("✅ Scan completed");
+    console.log(findings);
+
   } catch (err) {
-    console.error("Webhook Error:");
+    console.error("\n❌ Webhook Error");
     console.error(err);
   }
 });
 
-module.exports = router;
+export default router;
