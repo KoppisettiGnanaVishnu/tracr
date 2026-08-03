@@ -8,21 +8,24 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = new App({
-  appId: process.env.GITHUB_APP_ID,
-
-  privateKey: fs.readFileSync(
+// Read private key
+// Production (Render): GITHUB_PRIVATE_KEY
+// Local: private/tracr-ai.2026-07-06.private-key.pem
+const privateKey =
+  process.env.GITHUB_PRIVATE_KEY ||
+  fs.readFileSync(
     path.join(
       __dirname,
       "../private/tracr-ai.2026-07-06.private-key.pem"
     ),
     "utf8"
-  ),
+  );
 
+const app = new App({
+  appId: process.env.GITHUB_APP_ID,
+  privateKey,
   clientId: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
-
-  // ⭐ This is the important addition
   Octokit,
 });
 
