@@ -14,11 +14,19 @@ router.post("/webhook", async (req, res) => {
 
   const event = req.headers["x-github-event"];
 
-  // Only process Pull Request events
-  if (event !== "pull_request") return;
+// Only process Pull Request events
+if (event !== "pull_request") return;
 
-  // Only process newly opened PRs
-  if (req.body.action !== "opened") return;
+// Process only these PR actions
+const allowedActions = [
+  "opened",
+  "synchronize",
+  "reopened",
+];
+
+if (!allowedActions.includes(req.body.action)) {
+  return;
+}
 
   try {
     const owner = req.body.repository.owner.login;
