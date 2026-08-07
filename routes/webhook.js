@@ -1,5 +1,7 @@
 import express from "express";
+
 import { scanPullRequest } from "../github/scanner.js";
+import { createReview } from "../github/reviewer.js";
 
 const router = express.Router();
 
@@ -53,6 +55,7 @@ router.post("/webhook", async (req, res) => {
 
     console.log("🚀 Starting PR scan...");
 
+    // Scan Pull Request
     const findings = await scanPullRequest(
       owner,
       repo,
@@ -64,7 +67,20 @@ router.post("/webhook", async (req, res) => {
     console.log(findings);
     console.log("===================================");
 
+    // Post review comment on GitHub
+    console.log("💬 Posting review to GitHub...");
+
+    await createReview(
+      owner,
+      repo,
+      pullNumber,
+      installationId,
+      findings
+    );
+
+    console.log("✅ GitHub review posted successfully.");
     console.log("✅ Scan completed successfully.");
+
   } catch (err) {
     console.error("\n❌ WEBHOOK ERROR");
     console.error("--------------------------------");
