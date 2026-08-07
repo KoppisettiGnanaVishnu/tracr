@@ -9,26 +9,39 @@ export async function createReview(
 ) {
   const octokit = await getInstallationOctokit(installationId);
 
-  if (!findings || findings.length === 0) {
+  const issues = findings.issues || [];
+
+  if (issues.length === 0) {
     console.log("✅ No issues found.");
     return;
   }
 
-  let body = "## 🤖 TRACR AI Review\n\n";
+  let body = "# 🤖 TRACR AI Review\n\n";
 
-  body += `Found **${findings.length}** potential issue(s).\n\n`;
+  body += `## Repository Summary\n\n`;
 
-  findings.forEach((finding, index) => {
-    body += `### ${index + 1}. ${finding.icon} ${finding.title}\n`;
-    body += `**Severity:** ${finding.severity}\n\n`;
-    body += `${finding.message}\n\n`;
+  body += `- **Files Scanned:** ${findings.filesScanned}\n`;
+  body += `- **Issues Found:** ${issues.length}\n`;
+  body += `- **Risk Level:** ${findings.riskLevel}\n`;
+  body += `- **Trust Score:** ${findings.trustScore}/100\n\n`;
 
-    if (finding.file) {
-      body += `📄 File: \`${finding.file}\`\n\n`;
+  body += "---\n\n";
+
+  body += "## Findings\n\n";
+
+  issues.forEach((issue, index) => {
+    body += `### ${index + 1}. ${issue.icon} ${issue.title}\n\n`;
+    body += `**Severity:** ${issue.severity}\n\n`;
+    body += `${issue.message}\n\n`;
+
+    if (issue.file) {
+      body += `📄 File: \`${issue.file}\`\n\n`;
     }
 
-    body += "---\n";
+    body += "---\n\n";
   });
+
+  body += "_Generated automatically by **TRACR AI**._";
 
   await octokit.rest.pulls.createReview({
     owner,
@@ -38,5 +51,5 @@ export async function createReview(
     body,
   });
 
-  console.log("✅ Review successfully posted to GitHub.");
+  console.log("✅ GitHub Review posted successfully.");
 }
