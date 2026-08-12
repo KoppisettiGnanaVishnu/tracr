@@ -1,27 +1,31 @@
-# 🛡️ TRACRR
+# 🛡️ Tracr
 
-### AI-Powered GitHub Pull Request Security Review & Trust Analysis Platform
+### GitHub App for Pull Request Security Analysis & Trust Scoring
 
-TRACRR is a GitHub App that automatically analyzes Pull Requests, detects security vulnerabilities, evaluates repository risk, and generates actionable review reports before code is merged.
+Tracr automatically analyzes Pull Requests, detects security vulnerabilities, evaluates repository risk, and generates actionable review reports before code is merged.
 
 [![GitHub App](https://img.shields.io/badge/GitHub-App-blue)](https://github.com/apps/tracr-ai)
-[![Live Demo](https://img.shields.io/badge/Live-Demo-success)](https://tracr-6gyu.onrender.com)
+
+🚀 **Install & Test Tracr**
+https://github.com/apps/tracr-ai
 
 ---
 
-## 🚀 Try TRACRR Right Now
+# 🚀 Try Tracr Right Now
 
 No local setup required.
 
-### Step 1: Install the GitHub App
+### 1️⃣ Install the GitHub App
 
-👉 https://github.com/apps/tracr-ai
+Visit:
 
-### Step 2: Select a Repository
+https://github.com/apps/tracr-ai
 
-Install TRACRR on any personal or organization repository.
+### 2️⃣ Select a Repository
 
-### Step 3: Create a Pull Request
+Install Tracr on any personal or organization repository.
+
+### 3️⃣ Create a Pull Request
 
 Add vulnerable code such as:
 
@@ -32,27 +36,43 @@ const query =
   "SELECT * FROM users WHERE id = " + userId;
 ```
 
-### Step 4: Watch TRACRR Review Your Code
+### 4️⃣ Watch Tracr Review Your Code
 
-TRACRR automatically:
+Tracr automatically:
 
 * Detects security vulnerabilities
 * Evaluates repository risk
 * Generates Pull Request findings
-* Calculates repository trust scores
+* Calculates trust scores
 * Posts review reports directly to GitHub
 
 ---
 
-## 🌐 Live Application
+# 🧪 Test Tracr Yourself
 
-Demo URL:
+Tracr is publicly available as a GitHub App and can be tested on your own repositories.
 
-https://tracr-6gyu.onrender.com
+### Sample Test
+
+Create a Pull Request containing:
+
+```javascript
+const password = "admin123";
+
+const query =
+  "SELECT * FROM users WHERE id = " + userId;
+```
+
+### Expected Findings
+
+* Hardcoded Password
+* Possible SQL Injection
+
+Tracr will automatically analyze the Pull Request and generate a review report.
 
 ---
 
-# Why TRACRR?
+# 📖 Why Tracr?
 
 Code reviews are essential for maintaining software quality and security, but manual reviews are often:
 
@@ -63,27 +83,27 @@ Code reviews are essential for maintaining software quality and security, but ma
 
 Security issues such as hardcoded credentials and unsafe query construction can easily reach production environments.
 
-TRACRR acts as an automated first-pass security reviewer that analyzes Pull Requests and highlights potential risks before code is merged.
+Tracr acts as an automated first-pass security reviewer that analyzes Pull Requests and highlights potential risks before code is merged.
 
 ---
 
 # ⚡ Key Features
 
-### GitHub Integration
+## GitHub Integration
 
 * Public GitHub App Installation
 * Pull Request Monitoring
-* Webhook-Based Automation
+* GitHub Webhook Integration
 * Multi-Repository Support
 
-### Security Analysis
+## Security Analysis
 
 * Hardcoded Credential Detection
 * SQL Injection Detection
 * Repository Risk Assessment
 * Trust Score Generation
 
-### Developer Experience
+## Developer Experience
 
 * Automated Pull Request Reviews
 * Actionable Security Recommendations
@@ -94,7 +114,7 @@ TRACRR acts as an automated first-pass security reviewer that analyzes Pull Requ
 
 # 🌍 Language-Agnostic Security Scanning
 
-TRACRR performs pattern-based security analysis on source code changes and is not restricted to a single programming language.
+Tracr performs pattern-based security analysis on source code changes and is not restricted to a single programming language.
 
 ### Validated Languages
 
@@ -112,7 +132,7 @@ Additional language validations and security rules are actively being expanded.
 
 ---
 
-# 🔍 How TRACRR Works
+# 🔍 How Tracr Works
 
 ```text
 Developer Creates Pull Request
@@ -121,22 +141,22 @@ Developer Creates Pull Request
         GitHub Webhook Event
                 │
                 ▼
-          TRACRR Backend
+           Tracr Backend
                 │
                 ▼
-       Security Analysis Engine
+      Security Analysis Engine
                 │
                 ▼
-         Vulnerability Scanner
+        Vulnerability Scanner
                 │
                 ▼
-         Risk Evaluation Layer
+        Risk Evaluation Layer
                 │
                 ▼
-        Trust Score Generation
+       Trust Score Generation
                 │
                 ▼
-       Pull Request Review Report
+      Pull Request Review Report
 ```
 
 ---
@@ -145,18 +165,18 @@ Developer Creates Pull Request
 
 ## Vulnerable Pull Request
 
-TRACRR successfully detected security vulnerabilities in a Pull Request containing:
+Tracr successfully detected security vulnerabilities in a Pull Request containing:
 
 * Hardcoded Password
-* SQL Injection Pattern
+* Possible SQL Injection
 
-Add the screenshot below:
+### Screenshot
 
 ```text
 docs/images/vulnerable-pr-review.png
 ```
 
-Example Result:
+### Example Output
 
 ```text
 Files Scanned: 1
@@ -174,15 +194,15 @@ Trust Score: 90/100
 
 ## Clean Pull Request
 
-TRACRR correctly identified a clean Pull Request with no security findings.
+Tracr correctly identified a clean Pull Request with no security findings.
 
-Add the screenshot below:
+### Screenshot
 
 ```text
 docs/images/clean-pr-review.png
 ```
 
-Example Result:
+### Example Output
 
 ```text
 Files Scanned: 1
@@ -194,7 +214,7 @@ No issues detected
 Trust Score: 100/100
 ```
 
-This validation demonstrates both:
+This demonstrates:
 
 * ✅ Vulnerability Detection
 * ✅ Low False Positive Behavior
@@ -203,7 +223,7 @@ This validation demonstrates both:
 
 # 🧪 Validation Results
 
-TRACRR has been successfully tested using:
+Tracr has been successfully tested using:
 
 * ✅ Independent GitHub Accounts
 * ✅ Public GitHub App Installation
@@ -230,7 +250,7 @@ GitHub Repository
   Webhook Listener
         │
         ▼
-   TRACRR Backend
+    Tracr Backend
         │
  ┌──────┴──────┐
  ▼             ▼
@@ -272,7 +292,7 @@ GitHub Pull Request Review
 # 📂 Project Structure
 
 ```text
-tracr/
+Tracr/
 ├── src/
 │   ├── routes/
 │   ├── scanners/
@@ -291,16 +311,16 @@ tracr/
 # 🚀 Local Development
 
 ```bash
-git clone https://github.com/KoppisettiGnanaVishnu/TRACRR.git
+git clone https://github.com/KoppisettiGnanaVishnu/Tracr.git
 
-cd TRACRR
+cd Tracr
 
 npm install
 
 npm start
 ```
 
-Configure required environment variables before running the application.
+Configure the required environment variables before running the application.
 
 ---
 
@@ -310,16 +330,26 @@ Configure required environment variables before running the application.
 
 * Inline GitHub Review Comments
 * Additional Security Rules
-* AI-Assisted Code Understanding
 * Python Validation
 * Java Validation
+* AI-Assisted Code Understanding
 * Historical Risk Analytics
 * Team Security Dashboards
 * Advanced Trust Scoring Models
 
 ---
 
-# ⭐ Install & Test TRACRR
+# 🤝 Contributing
+
+Contributions, suggestions, and feedback are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a Pull Request
+
+---
+
+# ⭐ Install & Test Tracr
 
 Ready to try it yourself?
 
@@ -327,6 +357,6 @@ Ready to try it yourself?
 
 👉 https://github.com/apps/tracr-ai
 
-Install TRACRR on a repository, create a Pull Request, and experience automated security reviews directly within GitHub.
+Install Tracr on a repository, create a Pull Request, and experience automated security reviews directly within GitHub.
 
-If you find TRACRR useful, consider giving the repository a ⭐ and sharing feedback.
+If you find Tracr useful, consider giving the repository a ⭐.
