@@ -172,9 +172,7 @@ Tracr successfully detected security vulnerabilities in a Pull Request containin
 
 ### Screenshot
 
-```text
-docs/images/vulnerable-pr-review.png
-```
+![Tracr Vulnerable PR Review](docs/images/vulnerable-pr-review.png)
 
 ### Example Output
 
