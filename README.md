@@ -196,9 +196,7 @@ Tracr correctly identified a clean Pull Request with no security findings.
 
 ### Screenshot
 
-```text
-docs/images/clean-pr-review.png
-```
+![Tracr Clean PR Review](docs/images/clean-pr-review.png)
 
 ### Example Output
 
