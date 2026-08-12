@@ -21,6 +21,8 @@ Visit:
 
 https://github.com/apps/tracr-ai
 
+![Tracr GitHub App Installation](docs/images/install-page.png)
+
 ### 2️⃣ Select a Repository
 
 Install Tracr on any personal or organization repository.
@@ -172,9 +174,7 @@ Tracr successfully detected security vulnerabilities in a Pull Request containin
 
 ### Screenshot
 
-```text
-docs/images/vulnerable-pr-review.png
-```
+![Tracr Vulnerable PR Review](docs/images/vulnerable-pr-review.png)
 
 ### Example Output
 
@@ -198,9 +198,7 @@ Tracr correctly identified a clean Pull Request with no security findings.
 
 ### Screenshot
 
-```text
-docs/images/clean-pr-review.png
-```
+![Tracr Clean PR Review](docs/images/clean-pr-review.png)
 
 ### Example Output
 
