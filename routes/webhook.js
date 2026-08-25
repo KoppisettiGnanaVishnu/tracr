@@ -1,42 +1,123 @@
 import express from "express";
+import crypto from "crypto";
 
 import { scanPullRequest } from "../github/scanner.js";
 import { createReview } from "../github/reviewer.js";
+import { upsertInstallation, markUninstalled } from "../database/db.js";
 
 const router = express.Router();
 
+// ==========================================
+// Webhook Signature Verification
+// ==========================================
+
+/**
+ * Verifies the X-Hub-Signature-256 header sent by GitHub.
+ * This ensures the request genuinely comes from GitHub and not
+ * an arbitrary third party posting to our /webhook endpoint.
+ *
+ * Returns true if valid, false otherwise.
+ */
+function verifyWebhookSignature(req) {
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+
+  // If no secret is configured, skip verification in development
+  if (!secret) {
+    console.warn("⚠️  GITHUB_WEBHOOK_SECRET not set — skipping signature verification");
+    return true;
+  }
+
+  const signature = req.headers["x-hub-signature-256"];
+
+  if (!signature) {
+    console.error("❌ No X-Hub-Signature-256 header present");
+    return false;
+  }
+
+  const payload = JSON.stringify(req.body);
+  const expected = `sha256=${crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex")}`;
+
+  // Use timingSafeEqual to prevent timing attacks
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expected)
+    );
+  } catch {
+    return false;
+  }
+}
+
 /* =========================================================
-   GitHub Webhook
+   GitHub Webhook — Main Entry Point
+   Handles: pull_request, installation, installation_repositories
 ========================================================= */
 
 router.post("/webhook", async (req, res) => {
-  // Respond immediately so GitHub knows we received the event
+  // ── 0. Verify webhook signature ─────────────────────────────────────────────
+  if (!verifyWebhookSignature(req)) {
+    console.error("❌ Webhook signature verification FAILED — request rejected");
+    return res.status(401).json({ error: "Invalid webhook signature" });
+  }
+
+  // Respond immediately so GitHub doesn't retry the delivery
   res.sendStatus(200);
+
+  const event = req.headers["x-github-event"];
+  const action = req.body.action;
 
   console.log("\n========================================");
   console.log("🚀 Webhook Received");
   console.log("========================================");
-
-  const event = req.headers["x-github-event"];
-
   console.log("Event :", event);
-  console.log("Action:", req.body.action);
+  console.log("Action:", action);
 
-  // Only process Pull Request events
-  if (event !== "pull_request") {
-    console.log("❌ Ignored (Not a pull_request event)");
+  // ──────────────────────────────────────────────────────────────────────────
+  // Handle: installation events — track installs/uninstalls
+  // ──────────────────────────────────────────────────────────────────────────
+  if (event === "installation") {
+    const installationId = req.body.installation?.id;
+    const owner = req.body.installation?.account?.login;
+    const ownerType = req.body.installation?.account?.type;
+
+    if (action === "created") {
+      try {
+        upsertInstallation.run({
+          installation_id: installationId,
+          owner,
+          owner_type: ownerType,
+        });
+        console.log(`✅ Installation recorded: ${owner} (id=${installationId})`);
+      } catch (err) {
+        console.error("⚠️  Failed to record installation:", err.message);
+      }
+    } else if (action === "deleted") {
+      try {
+        markUninstalled.run(installationId);
+        console.log(`🗑️  Installation marked as removed: ${owner} (id=${installationId})`);
+      } catch (err) {
+        console.error("⚠️  Failed to update installation:", err.message);
+      }
+    }
+
     return;
   }
 
-  // Process only these PR actions
-  const allowedActions = [
-    "opened",
-    "synchronize",
-    "reopened",
-  ];
+  // ──────────────────────────────────────────────────────────────────────────
+  // Handle: pull_request events — the main scan flow
+  // ──────────────────────────────────────────────────────────────────────────
+  if (event !== "pull_request") {
+    console.log(`❌ Ignored (Unhandled event: ${event})`);
+    return;
+  }
 
-  if (!allowedActions.includes(req.body.action)) {
-    console.log(`❌ Ignored (Unsupported action: ${req.body.action})`);
+  const allowedActions = ["opened", "synchronize", "reopened"];
+
+  if (!allowedActions.includes(action)) {
+    console.log(`❌ Ignored (Unsupported PR action: ${action})`);
     return;
   }
 
@@ -53,54 +134,43 @@ router.post("/webhook", async (req, res) => {
     console.log("Sender          :", req.body.sender.login);
     console.log("==================================");
 
-    console.log("🚀 Starting PR scan...");
+    console.log("\n🔍 Starting PR scan...");
 
-    // Scan Pull Request
-    const findings = await scanPullRequest(
+    // ── Scan the PR ─────────────────────────────────────────────────────────
+    const report = await scanPullRequest(
       owner,
       repo,
       pullNumber,
       installationId
     );
 
-    console.log("\n========== REVIEW REPORT ==========");
-    console.log(findings);
+    console.log("\n========== SCAN COMPLETE ==========");
+    console.log(`Files:     ${report.filesScanned}`);
+    console.log(`Findings:  ${report.findings.length}`);
+    console.log(`Risk:      ${report.riskLevel}`);
+    console.log(`Score:     ${report.trustScoreResult.score}/100 (${report.trustScoreResult.grade})`);
     console.log("===================================");
 
-    // Post review comment on GitHub
-    console.log("💬 Posting review to GitHub...");
+    // ── Post review to GitHub ────────────────────────────────────────────────
+    console.log("\n💬 Posting review to GitHub...");
 
     await createReview(
       owner,
       repo,
       pullNumber,
       installationId,
-      findings
+      report
     );
 
-    console.log("✅ GitHub review posted successfully.");
-    console.log("✅ Scan completed successfully.");
+    console.log("✅ Review posted. Scan complete.");
 
   } catch (err) {
-    console.error("\n❌ WEBHOOK ERROR");
+    console.error("\n❌ WEBHOOK PROCESSING ERROR");
     console.error("--------------------------------");
-
-    console.error("Message:");
-    console.error(err.message);
-
-    if (err.status) {
-      console.error("Status:");
-      console.error(err.status);
-    }
-
-    if (err.response?.data) {
-      console.error("GitHub Response:");
-      console.error(err.response.data);
-    }
-
-    console.error("Stack:");
-    console.error(err.stack);
-
+    console.error("Message:", err.message);
+    if (err.status)          console.error("Status:", err.status);
+    if (err.response?.data)  console.error("GitHub Response:", err.response.data);
+    console.error("Stack:", err.stack);
     console.error("--------------------------------");
   }
 });
