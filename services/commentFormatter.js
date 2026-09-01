@@ -1,7 +1,8 @@
-// Tracr — Comment Formatter (Phase 1)
+// Tracr — Comment Formatter (Phase 2)
 //
 // Two formatters:
 //   formatInlineComment(finding)  → rich markdown for a single inline line comment
+//                                    Includes AI explanation, why-risky, and fix when available
 //   formatSummaryComment(report)  → PR-level summary posted as the review body
 
 // ==========================================
@@ -36,37 +37,47 @@ const GRADE_LABELS = {
  */
 export function formatInlineComment(finding) {
   const icon = RISK_COLORS[finding.severity] || "⚪";
-  const cweInfo = finding.cwe ? ` · [${finding.cwe}](https://cwe.mitre.org/data/definitions/${finding.cwe.replace("CWE-", "")}.html)` : "";
+  const cweInfo = finding.cwe
+    ? ` · [${finding.cwe}](https://cwe.mitre.org/data/definitions/${finding.cwe.replace("CWE-", "")}.html)`
+    : "";
   const confidencePct = Math.round((finding.confidence ?? 1) * 100);
+  const hasAI = !!(finding.aiExplanation || finding.aiFix);
 
   let body = "";
 
-  // Header
+  // ── Header ──
   body += `## ${icon} ${finding.title}\n`;
-  body += `**Severity:** \`${finding.severity}\`${cweInfo} &nbsp;·&nbsp; **Confidence:** ${confidencePct}%\n\n`;
+  body += `**Severity:** \`${finding.severity}\`${cweInfo} &nbsp;·&nbsp; **Confidence:** ${confidencePct}%`;
+  if (hasAI) body += ` &nbsp;·&nbsp; 🤖 *AI-analyzed*`;
+  body += `\n\n`;
 
-  // What was found
+  // ── What was detected ──
   body += `**What was detected:**\n`;
   body += `\`\`\`\n${finding.matchedText}\n\`\`\`\n\n`;
 
-  // Why it matters
-  body += `**Why this is risky:**\n`;
-  body += `${finding.message}\n\n`;
-
-  // AI explanation — populated in Phase 2, shown only when available
+  // ── Context-aware AI explanation (Phase 2) ──
   if (finding.aiExplanation) {
-    body += `**Context-aware analysis:**\n`;
+    body += `**Why this is risky (AI analysis):**\n`;
     body += `${finding.aiExplanation}\n\n`;
+  } else {
+    // Fallback to static rule message
+    body += `**Why this is risky:**\n`;
+    body += `${finding.message}\n\n`;
   }
 
-  // AI fix — populated in Phase 2
+  // ── AI real-world impact (Phase 2) ──
+  if (finding.aiWhyRisky) {
+    body += `**Real-world impact:**\n`;
+    body += `${finding.aiWhyRisky}\n\n`;
+  }
+
+  // ── Fix suggestion ──
   if (finding.aiFix) {
     body += `**Recommended fix:**\n`;
     body += `${finding.aiFix}\n\n`;
   } else {
-    // Generic fix prompt until Phase 2
     body += `**How to fix:**\n`;
-    body += `Review the flagged code and ensure it follows secure coding practices. ${getGenericFix(finding.ruleId)}\n\n`;
+    body += `${getGenericFix(finding.ruleId)}\n\n`;
   }
 
   body += `---\n*🛡️ [Tracr](https://github.com/apps/tracr-ai) · Automated Security Review*`;
